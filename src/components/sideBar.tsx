@@ -1,7 +1,7 @@
 import { Users, Hash, Settings, LogOut, UserPlus, BotMessageSquare } from 'lucide-react';
-import { Avatar, AvatarFallback } from '../components/ui/avatar';
-import { Button } from '../components/ui/button'
-import { ScrollArea } from '../components/ui/scroll-area';
+import { Avatar, AvatarFallback } from './ui/avatar';
+import { Button } from './ui/button'
+import { ScrollArea } from './ui/scroll-area';
 
 interface SidebarProps {
   currentUser: { username: string; email: string };
@@ -88,7 +88,7 @@ export function Sidebar({
       )}
 
       {/* User Section */}
-      <div className="p-3 bg-[#0a0a0f] border-t border-sidebar-border">
+      <div className="p-3 bg-[#0a0a0f] border-t border-sidebar-border w-59 fixed bottom-0">
         <div className="flex items-center gap-2">
           <Avatar className="w-8 h-8">
             <AvatarFallback className="bg-gradient-to-br from-purple-500 to-violet-600 text-white">

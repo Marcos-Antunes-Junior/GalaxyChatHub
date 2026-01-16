@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Input } from '../components/ui/input';
-import { Card } from '../components/ui/card';
+import { Input } from './ui/input';
+import { Card } from './ui/card';
 
 interface AuthPageProps {
     onLogin: (username: string, email: string) => void;
@@ -24,6 +24,9 @@ export function AuthPage({ onLogin }: AuthPageProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (isLogin) { // Handle login 
+            // Just log in immediately with whatever was typed 
+            // Will need to be changed when dealing with auth with backend
+            onLogin(email.split("@")[0] || "User", email);
             console.log("Login with:", { email, password });
         } else { // Handle registration 
             if (password !== confirmPassword) {
