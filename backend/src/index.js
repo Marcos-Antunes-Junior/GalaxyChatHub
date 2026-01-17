@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes.js';
+import { connectDatabase } from './database/database.ts';
 
 const app = express();
 const httpServer = createServer(app);
@@ -42,7 +43,12 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 
 // Start server
-httpServer.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+async function startServer() {
+  await connectDatabase(); // ⬅ DB first
 
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+}
+
+startServer();
