@@ -5,3 +5,5 @@ GalaxyChatHub is a real-time, text-based web chat application where users can cr
 ― Carl Sagan, Cosmos
 
 “Do not go where the path may lead, go instead where there is no path and leave a trail.” — Ralph Waldo Emerson
+
+“I learned that courage was not the absence of fear, but the triumph over it.” - Nelson Mandela 
