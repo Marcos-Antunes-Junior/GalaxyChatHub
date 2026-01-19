@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { Card } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { User, Mail, Edit2, Save, X, Shield } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface UserProfile {
   username: string;
@@ -26,7 +25,6 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
   const handleSave = () => {
     onUpdateProfile(editedUser);
     setIsEditing(false);
-    toast.success('Profile updated successfully!');
   };
 
   const handleCancel = () => {
