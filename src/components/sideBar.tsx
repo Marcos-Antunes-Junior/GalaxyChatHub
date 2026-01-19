@@ -1,4 +1,4 @@
-import { Users, Hash, Settings, LogOut, UserPlus, BotMessageSquare } from 'lucide-react';
+import { Users, Hash, Settings, LogOut, BotMessageSquare } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Button } from './ui/button'
 import { ScrollArea } from './ui/scroll-area';

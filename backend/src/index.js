@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes.js';
-import { connectDatabase } from './database/database.ts';
+import { connectDatabase } from './database/database.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
 
 // Basic route
 app.get('/', (req, res) => {
-  res.send('Welcome to Galaxy Chat Hub Backend!');
+  res.send('Welcome to Galaxy Chat Hub!');
 });
 
 // Use routes

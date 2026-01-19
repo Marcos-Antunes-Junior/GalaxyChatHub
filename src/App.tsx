@@ -3,6 +3,8 @@ import { AuthPage } from './components/authPage';
 import { Sidebar } from "./components/sideBar"
 import './App.css'
 import { ProfileView } from './components/ProfileView';
+import { FriendsView } from './components/FriendsView';
+import { ChatArea } from './components/ChatArea';
 import { socket } from './socket';
 
 interface User {
@@ -48,31 +50,45 @@ function App() {
     setCurrentUser({ username, email, joinedDate: new Date() });
   };
 
-
   const handleLogout = () => {
     setCurrentUser(null);
+    socket.disconnect();
   };
 
-    if (!currentUser) {
+  const handleUpdateProfile = (updates: Partial<User>) => {
+    if (currentUser) {
+      setCurrentUser({ ...currentUser, ...updates });
+    }
+  };
+
+  if (!currentUser) {
     return <AuthPage onLogin={handleLogin} />;
   }
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
+      <div className="fixed top-2 right-2 z-50">
+        <span className={`inline-block w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} title={isConnected ? "Connected" : "Disconnected"} />
+      </div>
+      
       <Sidebar
-        currentUser={{ username: "Demo", email: "demo@example.com" }}
+        currentUser={currentUser}
         activeView={activeView}
-        onViewChange={setActiveView} onLogout={function (): void {
-          throw new Error('Function not implemented.');
-        } } rooms={[]} onRoomSelect={function (roomId: string): void {
-          throw new Error('Function not implemented.');
-        } } selectedRoom={null}      />
+        onViewChange={setActiveView}
+        onLogout={handleLogout}
+        rooms={[]}
+        onRoomSelect={(roomId) => console.log("Room selected:", roomId)}
+        selectedRoom={null}
+      />
 
-        {activeView === "friends" && <div>Friends view placeholder</div>}
-        {activeView === "rooms" && <div>Select a room</div>}
-        {activeView === "rooms" && <div>Room: This is a room</div>}
-        {activeView === "profile" && <div>Profile view placeholder</div>}
-
+      {activeView === "friends" && <FriendsView />}
+      {activeView === "rooms" && <ChatArea />}
+      {activeView === "profile" && (
+        <ProfileView 
+          user={currentUser} 
+          onUpdateProfile={handleUpdateProfile} 
+        />
+      )}
     </div>
   )
 }
