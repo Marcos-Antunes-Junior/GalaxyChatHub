@@ -21,18 +21,68 @@ export function AuthPage({ onLogin }: AuthPageProps) {
     const [confirmPassword, setConfirmPassword] = useState("");
 
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // Error state
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (isLogin) { // Handle login 
-            // Just log in immediately with whatever was typed 
-            // Will need to be changed when dealing with auth with backend
-            onLogin(email.split("@")[0] || "User", email);
-            console.log("Login with:", { email, password });
-        } else { // Handle registration 
-            if (password !== confirmPassword) {
-                alert("Passwords do not match!");
-                return;
+        setError(null);
+        setLoading(true);
+
+        const API_URL = 'http://localhost:3000/api/auth';
+
+        try {
+            if (isLogin) { 
+                // Handle Login
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Login failed');
+                }
+
+                // Store token
+                localStorage.setItem('token', data.data.token);
+                localStorage.setItem('user', JSON.stringify(data.data.user));
+
+                // Notify parent
+                onLogin(data.data.user.username, data.data.user.email);
+            } else { 
+                // Handle Registration
+                if (password !== confirmPassword) {
+                    throw new Error("Passwords do not match!");
+                }
+
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // Backend schema only supports username, email, password. firstName/lastName ignored for now.
+                    body: JSON.stringify({ username, email, password }), 
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Registration failed');
+                }
+
+                // Store token
+                localStorage.setItem('token', data.data.token);
+                localStorage.setItem('user', JSON.stringify(data.data.user));
+
+                // Notify parent
+                onLogin(data.data.user.username, data.data.user.email);
             }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
     return (
@@ -49,6 +99,12 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                         {isLogin ? "Welcome back!" : "Create your account"}
                     </p>
                 </div>
+
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-4 text-sm text-center">
+                        {error}
+                    </div>
+                )}
 
                 {/* Conditional form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -147,9 +203,10 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 
                     <button
                         type="submit"
-                        className="w-full bg-primary hover:bg-primary/90 text-white"
+                        className="w-full bg-primary hover:bg-primary/90 text-white p-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={loading}
                     >
-                        {isLogin ? "Login" : "Register"}
+                        {loading ? 'Processing...' : (isLogin ? 'Log In' : 'Sign Up')}
                     </button>
                 </form>
 
