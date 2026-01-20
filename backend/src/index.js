@@ -1,8 +1,10 @@
+import 'dotenv/config';
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { connectDatabase } from './database/database.js';
 
 const app = express();
@@ -40,6 +42,7 @@ app.get('/', (req, res) => {
 });
 
 // Use routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
 // Start server
