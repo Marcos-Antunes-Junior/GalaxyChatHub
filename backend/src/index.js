@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes.js';
-import { connectDatabase } from './database/database.ts';
+import authRoutes from './routes/authRoutes.js';
+import { connectDatabase } from './database/database.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -36,10 +38,11 @@ io.on('connection', (socket) => {
 
 // Basic route
 app.get('/', (req, res) => {
-  res.send('Welcome to Galaxy Chat Hub Backend!');
+  res.send('Welcome to Galaxy Chat Hub!');
 });
 
 // Use routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
 // Start server
