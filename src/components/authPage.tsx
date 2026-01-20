@@ -30,7 +30,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
         setError(null);
         setLoading(true);
 
-        const API_URL = 'http://localhost:3000/api/auth';
+        const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000') + '/api/auth';
 
         try {
             if (isLogin) { 
