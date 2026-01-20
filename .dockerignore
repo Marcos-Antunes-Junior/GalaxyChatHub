@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+.git
+.vite
+.vscode
+coverage
+test_*.js
+reproduction_*.js

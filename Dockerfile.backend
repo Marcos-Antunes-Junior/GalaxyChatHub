@@ -1,0 +1,22 @@
+# Backend Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy dependency definitions
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy backend source code including prisma
+COPY backend ./backend
+
+# Generate Prisma Client
+RUN npx prisma generate --schema ./backend/prisma/schema.prisma
+
+# Expose the API port
+EXPOSE 3000
+
+# Start the server
+CMD ["node", "backend/src/index.js"]
