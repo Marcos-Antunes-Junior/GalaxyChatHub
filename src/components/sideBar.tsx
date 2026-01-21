@@ -36,7 +36,7 @@ export function Sidebar({
       <div className="p-2 border-b border-sidebar-border">
         <Button
           variant={activeView === 'friends' ? 'secondary' : 'ghost'}
-          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
+          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
           onClick={() => onViewChange('friends')}
         >
           <Users className="w-4 h-4 mr-2" />
@@ -44,7 +44,7 @@ export function Sidebar({
         </Button>
         <Button
           variant={activeView === 'rooms' ? 'secondary' : 'ghost'}
-          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent mt-1"
+          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent mt-1 cursor-pointer"
           onClick={() => onViewChange('rooms')}
         >
           <Hash className="w-4 h-4 mr-2" />
@@ -52,7 +52,7 @@ export function Sidebar({
         </Button>
         <Button
           variant={activeView === 'profile' ? 'secondary' : 'ghost'}
-          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent mt-1"
+          className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent mt-1 cursor-pointer"
           onClick={() => onViewChange('profile')}
         >
           <Settings className="w-4 h-4 mr-2" />
@@ -106,9 +106,9 @@ export function Sidebar({
             variant="ghost"
             size="icon"
             onClick={onLogout}
-            className="text-muted-foreground hover:text-white"
+            className="text-muted-foreground hover:text-white cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 " />
           </Button>
         </div>
       </div>

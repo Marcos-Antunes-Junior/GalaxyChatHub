@@ -1,5 +1,6 @@
 // services/userService.js
 import { users } from '../models/userModel.js';
+import { prisma } from "../database/database.js";
 
 export const getAllUsers = async () => {
   // Simulate database delay
@@ -20,5 +21,17 @@ export const createUser = async (userData) => {
     const newUser = { id: users.length + 1, ...userData };
     users.push(newUser);
     setTimeout(() => resolve(newUser), 100);
+  });
+};
+
+export const deleteUserById = async (id) => {
+  const user = await prisma.user.findUnique({
+    where: { id: Number(id) },
+  });
+
+  if (!user) return null;
+
+  return prisma.user.delete({
+    where: { id: Number(id) },
   });
 };

@@ -86,7 +86,8 @@ function App() {
       {activeView === "profile" && (
         <ProfileView 
           user={currentUser} 
-          onUpdateProfile={handleUpdateProfile} 
+          onUpdateProfile={handleUpdateProfile}
+          onLogout={handleLogout}
         />
       )}
     </div>
