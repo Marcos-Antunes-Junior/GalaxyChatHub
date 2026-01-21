@@ -1,6 +1,6 @@
 // routes/userRoutes.js
 import express from 'express';
-import { getUsers, getUser, createUser } from '../controllers/userController.js';
+import { getUsers, getUser, createUser, deleteUserById } from '../controllers/userController.js';
 import { isAuthenticated } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -11,5 +11,6 @@ const router = express.Router();
 router.get('/', isAuthenticated, getUsers);
 router.get('/:id', isAuthenticated, getUser);
 router.post('/', isAuthenticated, createUser);
+router.delete('/', isAuthenticated, deleteUserById);
 
 export default router;

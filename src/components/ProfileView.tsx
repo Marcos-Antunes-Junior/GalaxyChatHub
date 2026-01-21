@@ -1,10 +1,15 @@
-import { useState } from 'react';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Avatar, AvatarFallback } from '../components/ui/avatar';
-import { Card } from '../components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { User, Mail, Edit2, Save, X, Shield } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Avatar, AvatarFallback } from "../components/ui/avatar";
+import { Card } from "../components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import { User, Mail, Edit2, Save, X, Shield } from "lucide-react";
 
 interface UserProfile {
   username: string;
@@ -16,9 +21,10 @@ interface UserProfile {
 interface ProfileViewProps {
   user: UserProfile;
   onUpdateProfile: (updates: Partial<UserProfile>) => void;
+  onLogout: () => void;
 }
 
-export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
+export function ProfileView({ user, onUpdateProfile, onLogout }: ProfileViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState<UserProfile>(user);
 
@@ -32,6 +38,47 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
     setIsEditing(false);
   };
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Error state
+    const [error, setError] = useState<string | null>(null);
+
+  const handleDeleteAccount = async () => {
+     setError(null);
+
+    const token = localStorage.getItem("token");
+    try {
+      setIsDeleting(true);
+      const API_URL = 'http://localhost:3000/api/users';
+      const response = await fetch(`${API_URL}/`, {
+        method: "DELETE",
+         headers: {
+         Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if(data.success !== true)
+      {
+        throw new Error(data.message || 'Failed to delete account');
+      }
+      else
+      {
+        onLogout();
+      }
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-screen bg-background overflow-hidden">
       {/* Header */}
@@ -41,7 +88,7 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
           {!isEditing ? (
             <Button
               onClick={() => setIsEditing(true)}
-              className="bg-primary hover:bg-primary/90 text-white"
+              className="bg-primary hover:bg-primary/90 text-white cursor-pointer"
             >
               <Edit2 className="w-4 h-4 mr-2" />
               Edit Profile
@@ -82,7 +129,11 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
                   </AvatarFallback>
                 </Avatar>
                 {isEditing && (
-                  <Button variant="outline" size="sm" className="border-border text-white">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-border text-white"
+                  >
                     Change Avatar
                   </Button>
                 )}
@@ -105,7 +156,10 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
                     <Input
                       value={editedUser.username}
                       onChange={(e) =>
-                        setEditedUser({ ...editedUser, username: e.target.value })
+                        setEditedUser({
+                          ...editedUser,
+                          username: e.target.value,
+                        })
                       }
                       className="bg-input-background border-input text-white"
                     />
@@ -132,7 +186,6 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
                     <div className="text-white">{user.email}</div>
                   )}
                 </div>
-
               </div>
             </div>
           </Card>
@@ -140,17 +193,23 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
           {/* Additional Info Tabs */}
           <Tabs defaultValue="about" className="w-full">
             <TabsList className="bg-secondary">
-              <TabsTrigger value="about">About</TabsTrigger>
-              <TabsTrigger value="account">Account</TabsTrigger>
-              <TabsTrigger value="privacy">Privacy</TabsTrigger>
+              <TabsTrigger value="about" className="cursor-pointer">
+                About
+              </TabsTrigger>
+              <TabsTrigger value="account" className="cursor-pointer">
+                Account
+              </TabsTrigger>
+              <TabsTrigger value="privacy" className="cursor-pointer">
+                Privacy
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="about" className="mt-4">
+            <TabsContent value="about" className="mt-4 ">
               <Card className="bg-card/50 backdrop-blur border-border p-6">
                 <h3 className="text-white mb-4">About Me</h3>
                 {isEditing ? (
                   <textarea
-                    value={editedUser.bio || ''}
+                    value={editedUser.bio || ""}
                     onChange={(e) =>
                       setEditedUser({ ...editedUser, bio: e.target.value })
                     }
@@ -177,10 +236,10 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
                     <div>
                       <div className="text-white">Member Since</div>
                       <div className="text-sm text-muted-foreground">
-                        {user.joinedDate.toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
+                        {user.joinedDate.toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
                         })}
                       </div>
                     </div>
@@ -193,7 +252,11 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
                         ••••••••••••
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="border-border text-white">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-border text-white cursor-pointer"
+                    >
                       Change Password
                     </Button>
                   </div>
@@ -273,14 +336,59 @@ export function ProfileView({ user, onUpdateProfile }: ProfileViewProps) {
                     Permanently delete your account and all associated data
                   </div>
                 </div>
-                <Button variant="destructive" size="sm">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="cursor-pointer"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
                   Delete Account
                 </Button>
               </div>
+               {error && (
+                    <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-4 text-sm text-center">
+                        {error}
+                    </div>
+                )}
             </div>
           </Card>
         </div>
       </div>
+      {/*DeleteConfirm modal*/}
+      {showDeleteConfirm && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div className="bg-card p-6 rounded-lg w-[380px] border border-destructive/40">
+      <h3 className="text-white text-lg mb-2">
+        Delete account?
+      </h3>
+
+      <p className="text-sm text-muted-foreground mb-4">
+        This action is permanent and cannot be undone. All your data will be deleted.
+      </p>
+
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={() => setShowDeleteConfirm(false)}
+          disabled={isDeleting}
+          className="cursor-pointer"
+        >
+          Cancel
+        </Button>
+
+        <Button
+          variant="destructive"
+          onClick={handleDeleteAccount}
+          disabled={isDeleting}
+          className="cursor-pointer"
+        >
+          {isDeleting ? "Deleting..." : "Delete"}
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }

@@ -18,7 +18,7 @@
   --muted-foreground: #a0a0b8;
   --accent: #7c3aed;
   --accent-foreground: #ffffff;
-  --destructive: #ef4444;
+  --destructive: 0.62 0.23 29;
   --destructive-foreground: #ffffff;
   --border: rgba(139, 92, 246, 0.2);
   --input: rgba(139, 92, 246, 0.3);
@@ -80,6 +80,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-destructive: oklch(var(--destructive));
+  --color-destructive-foreground: var(--destructive-foreground);
 }
 
 @layer base {

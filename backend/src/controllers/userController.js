@@ -1,5 +1,6 @@
 // controllers/userController.js
 import * as userService from '../services/userService.js';
+import { prisma } from '../database/database.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
 
 export const getUsers = async (req, res) => {
@@ -34,3 +35,25 @@ export const createUser = async (req, res) => {
     return errorResponse(res, "Failed to create user", 500, error);
   }
 };
+
+export const deleteUserById = async (req, res) => {
+  try {
+    const id = req.user.userId;
+
+    const deletedUser = await userService.deleteUserById(id);
+
+    if (!deletedUser) {
+      return errorResponse(res, "User not found", 404);
+    }
+
+    return successResponse(
+      res,
+      null,
+      "User deleted successfully",
+      200
+    );
+  } catch (error) {
+    return errorResponse(res, "Failed to delete user", 500, error);
+  }
+};
+
