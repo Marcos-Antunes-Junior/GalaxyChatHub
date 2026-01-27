@@ -1,7 +1,6 @@
-// Append this to existing controller
 export const deleteConversation = async (req, res) => {
     try {
-      const { userId } = req.params; // The other user ID
+      const { userId } = req.params;
       const currentUserId = req.user.userId;
   
       if (!userId) {

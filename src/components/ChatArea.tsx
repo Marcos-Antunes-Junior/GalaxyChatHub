@@ -53,14 +53,14 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
   // 2. Listen for incoming messages
   useEffect(() => {
     const handler = (message: any) => {
-        // Strict check: Only append if it belongs to current chat
+        // Strict check
         const isRelated = 
             (message.senderId === currentUserId && message.receiverId === selectedFriend?.id) ||
             (message.senderId === selectedFriend?.id && message.receiverId === currentUserId);
 
         if (isRelated) {
              setMessages((prev) => {
-                 // Prevent duplicates if strict mode causes double-mount or latency
+                 // Prevent duplicates
                  if(prev.some(m => m.id === message.id)) return prev;
                  return [...prev, message];
              });
@@ -103,7 +103,7 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
         const data = await res.json();
         if(data.success) {
             setMessages([]); // Clear local UI
-            if(onMessageSent) onMessageSent(); // Triggers refresh of Sidebar list (removing the room)
+            if(onMessageSent) onMessageSent(); // Triggers refresh of Sidebar list
             alert("Conversation deleted.");
         } else {
             alert("Failed to delete.");

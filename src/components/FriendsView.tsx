@@ -32,13 +32,10 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
     });
     const data = await res.json();
     if(data.success) {
-        // If the backend returns { incoming: [], outgoing: [] } structure
-        // we handle it, or check if it's just array
         if(data.data.incoming) {
             setRequests(data.data.incoming);
-            // We could also set outgoing state if we had one
         } else {
-             setRequests(data.data); // Fallback if backend not updated yet
+             setRequests(data.data); 
         }
     }
   };

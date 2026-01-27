@@ -1,5 +1,3 @@
-// Append this to messageController.js or replace content if you verify structure.
-// I will append/export a new function.
 
 export const getConversations = async (req, res) => {
     try {
@@ -49,15 +47,12 @@ export const getConversations = async (req, res) => {
         }
       });
 
-      // Optionally, attach the last message? 
-      // For now, just return the User objects as "Rooms"
-      // We can map them to match the room interface
       const rooms = users.map(u => ({
-          id: u.id.toString(), // Client expects string ID for rooms often
+          id: u.id.toString(), // Client expects string ID for rooms
           name: u.username,
           avatarUrl: u.avatarUrl,
           status: u.status,
-          unread: 0 // TODO: Calculate unread
+          unread: 0 // Calculate unread
       }));
   
       return successResponse(res, rooms, "Conversations retrieved");

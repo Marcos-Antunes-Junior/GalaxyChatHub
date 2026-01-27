@@ -4,7 +4,7 @@ import { isAuthenticated } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// GET /api/messages/conversations - Must come BEFORE /:userId
+// GET /api/messages/conversations - Before /:userId
 router.get('/conversations', isAuthenticated, getConversations);
 // GET /api/messages/:userId
 router.get('/:userId', isAuthenticated, getMessages);
