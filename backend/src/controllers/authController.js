@@ -28,6 +28,12 @@ export const register = async (req, res) => {
       return errorResponse(res, "User with this email or username already exists", 409);
     }
 
+    // Limit check: Don't allow registration if reached 20 users
+    const userCount = await prisma.user.count();
+    if (userCount >= 20) {
+        return errorResponse(res, "Registration closed: Maximum user limit reached.", 403);
+    }
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
