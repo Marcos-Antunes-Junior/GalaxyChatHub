@@ -44,7 +44,7 @@ export const getFriendRequests = async (req, res) => {
       }
     });
 
-    // Outgoing requests (I asked them)
+    // Outgoing requests
     // This allows User A to see they have already sent a request
     const outgoing = await prisma.friend.findMany({
         where: {
