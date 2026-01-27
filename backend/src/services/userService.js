@@ -1,24 +1,37 @@
 // services/userService.js
-import { users } from '../models/userModel.js';
+import { prisma } from '../database/database.js';
 
 export const getAllUsers = async () => {
-  // Simulate database delay
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(users), 100);
+  return await prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      avatarUrl: true,
+      status: true
+    }
   });
 };
 
 export const getUserById = async (id) => {
-  return new Promise((resolve) => {
-    const user = users.find(u => u.id === parseInt(id));
-    setTimeout(() => resolve(user), 100);
+  return await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      bio: true,
+      avatarUrl: true,
+      status: true
+    }
   });
 };
 
 export const createUser = async (userData) => {
-  return new Promise((resolve) => {
-    const newUser = { id: users.length + 1, ...userData };
-    users.push(newUser);
-    setTimeout(() => resolve(newUser), 100);
+  // This is mostly handled by authController now, but kept for admin/internal usage if needed
+  return await prisma.user.create({
+    data: userData
   });
 };
