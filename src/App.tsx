@@ -112,8 +112,6 @@ function App() {
      if(currentUser) fetchRooms();
   }, [currentUser, activeView]); 
 
-  const handleLogin = (username: string, email: string) => {
-    setCurrentUser({ username, email, joinedDate: new Date() });
   const handleLogin = () => {
     loadUser();
   };
