@@ -10,8 +10,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prisma:generate": "npx prisma generate --cwd backend",
-    "prisma:migrate": "npx prisma migrate dev --cwd backend",
+    "prisma:generate": "npx prisma generate --config backend/prisma.config.ts",
+    "prisma:migrate": "npx prisma migrate dev --config backend/prisma.config.ts",
     "db:setup": "npm run prisma:migrate && npm run prisma:generate"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "@prisma/client": "^7.2.0",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-scroll-area": "^1.2.10",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@tailwindcss/vite": "^4.1.18",
     "bcryptjs": "^3.0.3",
     "clsx": "2.1.1",
@@ -28,13 +29,16 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.562.0",
+    "multer": "^2.0.2",
     "pg": "^8.17.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-easy-crop": "^5.5.6",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "3.2.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

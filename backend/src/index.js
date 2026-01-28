@@ -3,9 +3,17 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import { prisma } from './database/database.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
+import friendRoutes from './routes/friendRoutes.js';
 import { connectDatabase } from './database/database.js';
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const httpServer = createServer(app);
@@ -21,18 +29,54 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded avatars
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
 
 // Socket.IO connection handler
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+  console.log('User connected:', socket.id);
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+  // 1. Join a specific conversation room
+  socket.on('join_dm', ({ currentUserId, targetUserId }) => {
+    // Create a unique room ID for this pair
+    const roomId = [currentUserId, targetUserId].sort().join('_');
+    socket.join(roomId);
+    console.log(`User ${currentUserId} joined room ${roomId}`);
   });
 
-  // Example: Listen for chat messages
-  socket.on('chat_message', (msg) => {
-    io.emit('chat_message', msg); // Broadcast to all clients
+  // 2. Handle sending messages
+  socket.on('send_dm', async ({ senderId, receiverId, content }) => {
+    try {
+      // A. Save to Database (Prisma)
+      const newMessage = await prisma.directMessage.create({
+        data: {
+          content,
+          senderId,
+          receiverId
+        },
+        include: {
+          sender: true // Optional: Sender Details
+        }
+      });
+
+      // B. Broadcast to the specific room
+      const roomId = [senderId, receiverId].sort().join('_');
+      io.to(roomId).emit('receive_dm', newMessage);
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Optional: Emit error back to sender
+      socket.emit('message_error', { error: 'Failed to send' });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
   });
 });
 
@@ -44,6 +88,9 @@ app.get('/', (req, res) => {
 // Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/friends', friendRoutes);
+
 
 // Start server
 async function startServer() {
