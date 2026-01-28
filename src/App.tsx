@@ -22,6 +22,25 @@ function App() {
     "friends",
   );
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const [selectedFriend, setSelectedFriend] = useState<any | null>(null);
+  const [rooms, setRooms] = useState<any[]>([]);
+
+  // Restore session on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+         // Ensure we have the minimal required fields
+         if(parsedUser.username && parsedUser.email) {
+            setCurrentUser({ ...parsedUser, joinedDate: new Date() });
+         }
+      } catch (e) {
+        console.error("Failed to parse stored user", e);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
   const loadUser = async () => {
     const token = localStorage.getItem("token");
@@ -74,12 +93,35 @@ function App() {
     };
   }, [currentUser]);
 
+  // Fetch Rooms (Conversations)
+  const fetchRooms = async () => {
+     if(!currentUser) return;
+     try {
+       const token = localStorage.getItem('token');
+       const res = await fetch('http://localhost:3000/api/messages/conversations', {
+           headers: { Authorization: `Bearer ${token}` }
+       });
+       const data = await res.json();
+       if(data.success) {
+           setRooms(data.data);
+       }
+     } catch(e) { console.error(e); }
+  };
+
+  useEffect(() => {
+     if(currentUser) fetchRooms();
+  }, [currentUser, activeView]); 
+
+  const handleLogin = (username: string, email: string) => {
+    setCurrentUser({ username, email, joinedDate: new Date() });
   const handleLogin = () => {
     loadUser();
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     socket.disconnect();
   };
 
@@ -131,6 +173,7 @@ function App() {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
+      
       <div className="fixed top-2 right-2 z-50">
         <span
           className={`inline-block w-3 h-3 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
@@ -143,13 +186,36 @@ function App() {
         activeView={activeView}
         onViewChange={setActiveView}
         onLogout={handleLogout}
-        rooms={[]}
-        onRoomSelect={(roomId) => console.log("Room selected:", roomId)}
-        selectedRoom={null}
+        rooms={rooms}
+        onRoomSelect={(roomId) => {
+            const room = rooms.find(r => r.id === roomId);
+            if(room) {
+                // Ensure ID is passed as number if needed, but ChatArea uses it as is (or casts it)
+                setSelectedFriend({ ...room, id: parseInt(room.id) }); 
+                setActiveView('rooms'); 
+            }
+        }}
+        selectedRoom={selectedFriend?.id?.toString()}
       />
 
-      {activeView === "friends" && <FriendsView />}
-      {activeView === "rooms" && <ChatArea />}
+      {activeView === "friends" && (
+        <FriendsView 
+             onChatSelect={(friend) => {
+                 setSelectedFriend(friend);
+                 setActiveView('rooms'); 
+             }}
+        />
+      )}
+      
+      {activeView === "rooms" && (
+        <ChatArea 
+           currentUserId={JSON.parse(localStorage.getItem('user') || '{}').id} 
+           selectedFriend={selectedFriend} 
+           onMessageSent={fetchRooms}
+           isConnected={isConnected}
+        />
+      )}
+      
       {activeView === "profile" && (
         <ProfileView
           user={currentUser}
