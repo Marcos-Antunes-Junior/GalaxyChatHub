@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AuthPage } from "./components/authPage";
+import { AuthPage } from "./components/AuthPage";
 import { Sidebar } from "./components/sideBar";
 import "./App.css";
 import { ProfileView } from "./components/profile/ProfileView";
@@ -112,8 +112,6 @@ function App() {
      if(currentUser) fetchRooms();
   }, [currentUser, activeView]); 
 
-  const handleLogin = (username: string, email: string) => {
-    setCurrentUser({ username, email, joinedDate: new Date() });
   const handleLogin = () => {
     loadUser();
   };

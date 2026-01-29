@@ -20,7 +20,6 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
   useEffect(() => {
     if (!selectedFriend) return;
 
-    const roomId = [currentUserId, selectedFriend.id].sort().join('_');
     // Join the 'room' for these two users
     socket.emit("join_dm", { currentUserId, targetUserId: selectedFriend.id });
 
