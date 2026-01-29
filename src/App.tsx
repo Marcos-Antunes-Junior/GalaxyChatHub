@@ -7,6 +7,7 @@ import { FriendsView } from "./components/FriendsView";
 import { ChatArea } from "./components/ChatArea";
 import { socket } from "./socket";
 import { ConfirmModal } from "./components/ui/confirm-modal";
+import { API_URL } from "./config";
 
 interface User {
   id: number;
@@ -54,7 +55,7 @@ function App() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const res = await fetch("http://localhost:3000/api/users/me/", {
+    const res = await fetch(`${API_URL}/api/users/me/`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -128,13 +129,13 @@ function App() {
      const token = localStorage.getItem('token');
      try {
        // Fetch DMs
-       const resDM = await fetch('http://localhost:3000/api/messages/conversations', {
+       const resDM = await fetch(`${API_URL}/api/messages/conversations`, {
            headers: { Authorization: `Bearer ${token}` }
        });
        const dataDM = await resDM.json();
        
        // Fetch Rooms
-       const resRooms = await fetch('http://localhost:3000/api/rooms', {
+       const resRooms = await fetch(`${API_URL}/api/rooms`, {
            headers: { Authorization: `Bearer ${token}` }
        });
        const dataRooms = await resRooms.json();
@@ -188,7 +189,7 @@ function App() {
     formData.append("removeAvatar", "true");
   }
 
-  const res = await fetch("http://localhost:3000/api/users/me", {
+  const res = await fetch(`${API_URL}/api/users/me`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${token}`,
