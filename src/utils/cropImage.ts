@@ -1,6 +1,13 @@
+interface CropArea {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export const getCroppedImg = async (
   imageSrc: string,
-  crop: any,
+  crop: CropArea,
   outputSize = 256
 ): Promise<Blob> => {
   const image = new Image();
