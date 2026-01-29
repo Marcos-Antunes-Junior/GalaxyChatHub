@@ -101,7 +101,7 @@ If you want to deploy a specific branch (e.g., `dev` or `staging`) as your main 
 
 3.  **Configure Build Settings (Vite Project)**:
     *   **Base directory**: `.` (Leave empty or entering a dot is fine - since `package.json` is in the root)
-    *   **Build command**: `npm run build`
+    *   **Build command**: `CI=false npm run build` (Prevents warnings from failing the build)
     *   **Publish directory**: `dist`
     *   **Branch to deploy**: Select your desired branch (e.g., `main` or `feature-branch`).
 
