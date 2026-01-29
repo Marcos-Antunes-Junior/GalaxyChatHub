@@ -249,6 +249,7 @@ function App() {
            selectedFriend={selectedFriend} 
            onMessageSent={fetchRooms}
            isConnected={isConnected}
+           onBack={() => setSelectedFriend(undefined)}
         />
       )}
       

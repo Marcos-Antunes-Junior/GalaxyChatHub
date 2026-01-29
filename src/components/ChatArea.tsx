@@ -2,16 +2,24 @@ import { useEffect, useState, useRef } from "react";
 import { socket } from "../socket";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { SendHorizontal, Trash2 } from "lucide-react";
+import { SendHorizontal, Trash2, ArrowLeft, LogOut, UserPlus, Users } from "lucide-react";
 import { ConfirmModal } from "./ui/confirm-modal";
+import { AddMemberDialog } from "./AddMemberDialog";
+import { MembersListModal } from "./MembersListModal";
 
-export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConnected }: any) {
+export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConnected, onBack }: any) {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [modal, setModal] = useState({ isOpen: false, title: "", message: "", type: "info" as "danger"|"info"|"alert", onConfirm: undefined as undefined | (() => void) });
+  
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [showMembersList, setShowMembersList] = useState(false);
 
+  // Safely derive friend info
   const chatName = selectedFriend?.name || selectedFriend?.username || "Chat";
+  const isRoom = selectedFriend?.type === 'room';
+  const friendId = selectedFriend?.originalId || selectedFriend?.id;
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -26,16 +34,16 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
     const token = localStorage.getItem('token');
     
     setMessages([]); // Clear on switch
-    const friendId = selectedFriend.originalId || selectedFriend.id;
-    const isRoom = selectedFriend.type === 'room';
+    const fId = selectedFriend.originalId || selectedFriend.id;
+    const isRoomType = selectedFriend.type === 'room';
 
     const joinSession = () => {
-         if (isRoom) {
+         if (isRoomType) {
             // Join Group Room
-            socket.emit("join_room", { roomId: friendId });
+            socket.emit("join_room", { roomId: fId });
          } else {
             // Join DM
-            socket.emit("join_dm", { currentUserId, targetUserId: friendId });
+            socket.emit("join_dm", { currentUserId, targetUserId: fId });
         }
     };
 
@@ -50,29 +58,18 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
     socket.on("connect", onConnect);
 
     // Fetch History
-    if (isRoom) {
-        fetch(`http://localhost:3000/api/rooms/${friendId}/messages`, {
-           headers: { 'Authorization': `Bearer ${token}` }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) setMessages(data.data);
-        })
-        .catch(err => console.error("Failed to fetch room history", err));
+    const fetchUrl = isRoomType 
+        ? `http://localhost:3000/api/rooms/${fId}/messages`
+        : `http://localhost:3000/api/messages/${fId}`;
 
-    } else {
-        // DM Logic
-        fetch(`http://localhost:3000/api/messages/${friendId}`, {
-           headers: {
-             'Authorization': `Bearer ${token}`
-           }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) setMessages(data.data);
-        })
-        .catch(err => console.error("Failed to fetch history", err));
-    }
+    fetch(fetchUrl, {
+       headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) setMessages(data.data);
+    })
+    .catch(err => console.error("Failed to fetch history", err));
 
     return () => {
         socket.off("connect", onConnect);
@@ -83,16 +80,16 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
   useEffect(() => {
     const dmHandler = (message: any) => {
         if (selectedFriend?.type !== 'dm' && !(!selectedFriend?.type)) return; // Only if DM or legacy
-        const friendId = selectedFriend?.originalId || selectedFriend?.id;
+        const fId = selectedFriend?.originalId || selectedFriend?.id;
         const cId = Number(currentUserId);
-        const fId = Number(friendId);
+        const friendIdRes = Number(fId);
         const mSender = Number(message.senderId);
         const mReceiver = Number(message.receiverId);
 
         // Strict check
         const isRelated = 
-            (mSender === cId && mReceiver === fId) ||
-            (mSender === fId && mReceiver === cId);
+            (mSender === cId && mReceiver === friendIdRes) ||
+            (mSender === friendIdRes && mReceiver === cId);
 
         if (isRelated) {
              setMessages((prev) => {
@@ -124,15 +121,14 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
   const handleSend = () => {
     if (!inputText.trim() || !selectedFriend) return;
 
-    const isRoom = selectedFriend.type === 'room';
+    const isRoomType = selectedFriend.type === 'room';
     
-    // Explicitly parse IDs to avoid mismatched types (string vs number)
-    const friendId = selectedFriend.originalId ? parseInt(selectedFriend.originalId) : parseInt(selectedFriend.id);
+    const fId = selectedFriend.originalId ? parseInt(selectedFriend.originalId) : parseInt(selectedFriend.id);
     const myId = parseInt(currentUserId);
 
-    if (isRoom) {
+    if (isRoomType) {
          socket.emit("send_room_message", {
-             roomId: friendId,
+             roomId: fId,
              content: inputText,
              userId: myId
          }, (response: any) => {
@@ -149,7 +145,7 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
         // Emit to server
         socket.emit("send_dm", {
             senderId: myId,
-            receiverId: friendId,
+            receiverId: fId,
             content: inputText
         }, (response: any) => {
              // Callback after server confirmation
@@ -167,9 +163,6 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
   };
 
   const confirmDelete = async () => {
-     const isRoom = selectedFriend.type === 'room';
-     const friendId = selectedFriend.originalId || selectedFriend.id;
-     
      try {
         const token = localStorage.getItem('token');
         const url = isRoom 
@@ -190,7 +183,10 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
                 title: "Success",
                 message: isRoom ? "Group deleted." : "Conversation deleted.",
                 type: "alert",
-                onConfirm: () => setModal(prev => ({ ...prev, isOpen: false }))
+                onConfirm: () => {
+                    setModal(prev => ({ ...prev, isOpen: false }));
+                    if(onBack) onBack();
+                }
             });
         } else {
              setModal({
@@ -216,8 +212,6 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
   const handleDeleteConversation = () => {
     if(!selectedFriend) return;
     
-    const isRoom = selectedFriend.type === 'room';
-    
     setModal({
         isOpen: true,
         title: isRoom ? "Delete Group?" : "Delete Conversation?",
@@ -228,6 +222,50 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
         onConfirm: confirmDelete
     });
   };
+
+  const confirmLeave = async () => {
+       try {
+           const token = localStorage.getItem('token');
+           const res = await fetch(`http://localhost:3000/api/rooms/${friendId}/leave`, {
+               method: 'POST',
+               headers: { Authorization: `Bearer ${token}` }
+           });
+           const data = await res.json();
+           if(data.success) {
+               setModal({
+                   isOpen: true,
+                   title: "Left Group",
+                   message: `You left "${chatName}".`,
+                   type: "info",
+                   onConfirm: () => {
+                       setModal(prev => ({ ...prev, isOpen: false }));
+                       if(onBack) onBack();
+                       if(onMessageSent) onMessageSent();
+                   }
+               });
+           } else {
+               setModal({
+                   isOpen: true,
+                   title: "Error",
+                   message: "Failed to leave group.",
+                   type: "alert",
+                   onConfirm: undefined
+               });
+           }
+       } catch (e) {
+           console.error(e);
+       }
+  }
+
+  const handleLeaveGroup = () => {
+      setModal({
+          isOpen: true,
+          title: "Leave Group?",
+          message: `Are you sure you want to leave "${chatName}"?`,
+          type: "danger",
+          onConfirm: confirmLeave
+      });
+  }
 
   if(!selectedFriend) {
       return (
@@ -243,6 +281,9 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
     <div className="flex-1 flex flex-col h-full bg-[#313338] text-gray-100">
        <div className="h-14 border-b border-[#26272D] flex items-center px-4 shadow-sm bg-[#313338] justify-between">
         <div className="flex items-center gap-3">
+             <Button variant="ghost" size="icon" onClick={onBack} className="text-gray-400 hover:text-white mr-2" title="Back">
+                  <ArrowLeft className="w-5 h-5" />
+             </Button>
              <Avatar className="w-8 h-8">
                 <AvatarFallback className="bg-purple-600 text-white text-xs">
                     {chatName?.[0]?.toUpperCase()}
@@ -258,9 +299,25 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
                 </div>
             </div>
         </div>
-        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500 hover:bg-transparent" onClick={handleDeleteConversation} title="Delete Conversation">
-            <Trash2 className="w-5 h-5" />
-        </Button>
+
+        <div className="flex items-center gap-1">
+             {isRoom && (
+                 <>
+                    <Button variant="ghost" size="icon" onClick={() => setShowMembersList(true)} className="text-gray-400 hover:text-white" title="Members">
+                        <Users className="w-5 h-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => setShowAddMember(true)} className="text-gray-400 hover:text-white" title="Add Member">
+                        <UserPlus className="w-5 h-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={handleLeaveGroup} className="text-gray-400 hover:text-red-500" title="Leave Group">
+                        <LogOut className="w-5 h-5" />
+                    </Button>
+                 </>
+             )}
+             <Button variant="ghost" size="icon" className="text-gray-400 hover:text-red-500 hover:bg-transparent" onClick={handleDeleteConversation} title="Delete Conversation">
+                <Trash2 className="w-5 h-5" />
+             </Button>
+        </div>
       </div>
 
        <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
@@ -268,6 +325,19 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
             const senderId = msg.senderId || msg.userId;
             const isMe = Number(senderId) === Number(currentUserId);
             const senderName = msg.sender?.username || msg.user?.username || (isMe ? "Me" : chatName);
+
+            // Check if system message
+            const isSystemMessage = msg.content && msg.content.startsWith('SYSTEM:');
+            if (isSystemMessage) {
+                const systemContent = msg.content.replace('SYSTEM:', '');
+                return (
+                    <div key={msg.id || idx} className="flex justify-center my-2">
+                        <span className="text-xs text-gray-500 bg-[#26272D] px-3 py-1 rounded-full">
+                            {systemContent}
+                        </span>
+                    </div>
+                );
+            }
 
             return (
            <div key={msg.id || idx} className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}>
@@ -310,6 +380,18 @@ export function ChatArea({ currentUserId, selectedFriend, onMessageSent, isConne
           type={modal.type}
           onConfirm={modal.onConfirm}
           onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+       />
+       
+       <AddMemberDialog 
+           isOpen={showAddMember} 
+           onClose={() => setShowAddMember(false)} 
+           roomId={typeof friendId === 'string' ? parseInt(friendId) : friendId}
+           onAdded={() => { null }}
+       />
+       <MembersListModal
+           isOpen={showMembersList}
+           onClose={() => setShowMembersList(false)}
+           roomId={typeof friendId === 'string' ? parseInt(friendId) : friendId}
        />
     </div>
   );

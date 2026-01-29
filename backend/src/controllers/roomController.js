@@ -170,3 +170,181 @@ export const deleteRoom = async (req, res) => {
   }
 };
 
+export const leaveRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const currentUserId = req.user.userId;
+
+    if (!roomId) return errorResponse(res, "Room ID required", 400);
+
+    const membership = await prisma.roomMember.findUnique({
+      where: {
+        userId_roomId: {
+          userId: currentUserId,
+          roomId: parseInt(roomId)
+        }
+      },
+      include: {
+        user: true
+      }
+    });
+
+    if (!membership) return errorResponse(res, "Not a member", 400);
+
+    // Create system message
+    const systemMsg = await prisma.message.create({
+      data: {
+        roomId: parseInt(roomId),
+        userId: currentUserId,
+        content: `SYSTEM:${membership.user.username} left the group`
+      },
+      include: {
+        user: {
+            select: {
+                id: true,
+                username: true,
+                avatarUrl: true
+            }
+        }
+      }
+    });
+
+    // Notify room
+    if (req.io) {
+       req.io.to(`group_${roomId}`).emit('receive_room_message', systemMsg);
+    }
+
+    // Remove member
+    await prisma.roomMember.delete({
+      where: {
+        userId_roomId: {
+          userId: currentUserId,
+          roomId: parseInt(roomId)
+        }
+      }
+    });
+
+    return successResponse(res, null, "Left room successfully");
+
+  } catch (error) {
+    console.error("Error leaving room:", error);
+    return errorResponse(res, "Failed to leave room", 500);
+  }
+};
+
+export const addMember = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { userId } = req.body;
+    const currentUserId = req.user.userId;
+
+    if (!roomId || !userId) return errorResponse(res, "Missing parameters", 400);
+
+    // Verify requester is member
+    const requesterMembership = await prisma.roomMember.findUnique({
+      where: {
+         userId_roomId: {
+             userId: currentUserId,
+             roomId: parseInt(roomId)
+         }
+      }
+    });
+    if(!requesterMembership) return errorResponse(res, "Not authorized", 403);
+
+    // Check if simple check user exists or is already member
+    const existingMember = await prisma.roomMember.findUnique({
+        where: {
+            userId_roomId: {
+                userId: parseInt(userId),
+                roomId: parseInt(roomId)
+            }
+        }
+    });
+
+    if (existingMember) return errorResponse(res, "User already in room", 400);
+    
+    // Add member
+    await prisma.roomMember.create({
+        data: {
+            userId: parseInt(userId),
+            roomId: parseInt(roomId)
+        }
+    });
+
+    const userToAdd = await prisma.user.findUnique({ where: { id: parseInt(userId) }});
+
+    // Create system message
+    const systemMsg = await prisma.message.create({
+      data: {
+        roomId: parseInt(roomId),
+        userId: parseInt(userId), 
+        // Using "SYSTEM:" prefix to denote system messages for frontend parsing
+        content: `SYSTEM:${userToAdd.username} has been added to the group`
+      },
+      include: {
+        user: {
+            select: {
+                id: true,
+                username: true,
+                avatarUrl: true
+            }
+        }
+      }
+    });
+
+    if (req.io) {
+        req.io.to(`group_${roomId}`).emit('receive_room_message', systemMsg);
+    }
+
+    return successResponse(res, null, "Member added");
+
+  } catch (error) {
+     console.error("Error adding member:", error);
+     return errorResponse(res, "Failed to add member", 500);
+  }
+};
+
+export const getRoomMembers = async (req, res) => {
+    try {
+        const { roomId } = req.params;
+        const currentUserId = req.user.userId;
+
+        // Verify membership
+        const membership = await prisma.roomMember.findUnique({
+            where: {
+                userId_roomId: {
+                    userId: currentUserId,
+                    roomId: parseInt(roomId)
+                }
+            }
+        });
+        if(!membership) return errorResponse(res, "Not authorized", 403);
+
+        const members = await prisma.roomMember.findMany({
+            where: { roomId: parseInt(roomId) },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        username: true,
+                        firstName: true,
+                        lastName: true,
+                        avatarUrl: true,
+                        status: true
+                    }
+                }
+            }
+        });
+        
+        // Flatten structure if needed, or return as is.
+        const activeMembers = members.map(m => m.user);
+
+        return successResponse(res, activeMembers, "Members fetched");
+
+    } catch(error) {
+        console.error("Error fetching members:", error);
+        return errorResponse(res, "Failed to fetch members", 500);
+    }
+};
+
+
