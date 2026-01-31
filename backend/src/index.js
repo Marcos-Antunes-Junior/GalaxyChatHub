@@ -18,17 +18,28 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const httpServer = createServer(app);
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:4173",
+  process.env.CLIENT_URL, // Add your Vercel URL here via environment variable
+].filter(Boolean); // Remove empty values
+
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
