@@ -25,7 +25,8 @@ const normalizeOrigin = (url) => url ? url.replace(/\/$/, "") : "";
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:4173", // Explicitly added from error message
-  "https://galaxy-gch.vercel.app/", // Potential other Vercel URL
+  "https://galaxy-gch.vercel.app/", 
+  "https://galaxy-chat-hub.vercel.app/", // Potential other Vercel URL
   normalizeOrigin(process.env.CLIENT_URL)     // Environment variable
 ].filter(Boolean);
 
