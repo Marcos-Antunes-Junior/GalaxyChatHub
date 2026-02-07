@@ -185,7 +185,7 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
       
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:gap-2">
         <input 
-            className="min-w-0 flex-1 rounded border border-gray-700 bg-gray-800 p-2.5 text-sm outline-none transition-colors placeholder:text-gray-500 focus:border-purple-500 sm:w-64"
+            className="w-full sm:w-64 max-w-md rounded border border-gray-700 bg-gray-800 p-2.5 text-sm outline-none transition-colors placeholder:text-gray-500 focus:border-purple-500"
             placeholder="Add friend by username" 
             value={newFriendName}
             onChange={e => setNewFriendName(e.target.value)}
@@ -199,7 +199,7 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
         {requests.length === 0 && <p className="text-sm text-gray-500">No pending requests</p>}
         {requests.map(req => (
             <div key={req.id} className="mb-2 flex flex-col gap-2 rounded bg-gray-900 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="min-w-0 truncate text-sm sm:text-base">{req.sender.username} wants to be friends</span>
+                <span className="min-w-0 truncate text-sm sm:text-base">{req.sender.username} wants to be friend</span>
                 <div className="flex shrink-0 self-end gap-2 sm:self-center">
                   <button onClick={() => acceptRequest(req.id)} className="h-10 rounded bg-green-600 px-3 py-1.5 text-sm cursor-pointer hover:bg-green-700">Accept</button>
                   <button onClick={() => rejectRequest(req.id)} className="h-10 rounded bg-red-600 px-3 py-1.5 text-sm cursor-pointer hover:bg-red-700">Reject</button>
