@@ -280,7 +280,7 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
                 )}
               </div>
 
-              {/* USER INFO – THIS WAS MISSING */}
+              {/* USER INFO */}
               <div className="min-w-0">
                 <div className="truncate font-medium">{friend.username}</div>
 
