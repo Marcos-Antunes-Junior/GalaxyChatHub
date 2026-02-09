@@ -2,6 +2,7 @@
 import * as userService from '../services/userService.js';
 import { prisma } from '../database/database.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
+import bcrypt from 'bcryptjs';
 
 export const getUsers = async (req, res) => {
   try {
@@ -65,7 +66,8 @@ export const uploadUserAvatar = async (req, res) => {
       return errorResponse(res, "No file uploaded", 400);
     }
 
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    // Use the Cloudinary URL directly
+    const avatarUrl = req.file.path; 
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -126,7 +128,8 @@ export const updateMe = async (req, res) => {
 
     // Avatar upload
     if (req.file) {
-      data.avatarUrl = `/uploads/avatars/${req.file.filename}`;
+      // Use the Cloudinary URL directly
+      data.avatarUrl = req.file.path;
     }
 
     // Avatar removal
@@ -155,6 +158,48 @@ export const updateMe = async (req, res) => {
     return errorResponse(res, "Failed to update profile", 500, error);
   }
 };
+
+export async function changePassword(req, res) {
+  const userId = req.user.userId;
+  const { currentPassword, newPassword } = req.body;
+
+    // ---- PASSWORD VALIDATION ----
+  const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,12}$/;
+
+  if (!passwordRegex.test(newPassword)) {
+    return res.status(400).json({
+      message:
+        "Password must be 8–12 characters, contain at least 1 number and 1 special character",
+    });
+  }
+  // -----------------------------
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  const match = await bcrypt.compare(
+    currentPassword,
+    user.password
+  );
+
+  if (!match) {
+    return res.status(400).json({
+      message: "Current password is incorrect",
+    });
+  }
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      password: hashed,
+    },
+  });
+
+  return res.json({ success: true });
+}
 
 
 

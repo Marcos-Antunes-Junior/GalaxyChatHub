@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
+import { API_URL } from "../config";
 
 interface AuthPageProps {
   onLogin: (username: string, email: string) => void;
@@ -41,12 +42,12 @@ export function AuthPage({ onLogin }: AuthPageProps) {
     setError(null);
     setLoading(true);
 
-    const API_URL = "http://localhost:3000/api/auth";
+    const AUTH_URL = `${API_URL}/api/auth`;
 
     try {
       if (isLogin) {
         // Handle Login
-        const response = await fetch(`${API_URL}/login`, {
+        const response = await fetch(`${AUTH_URL}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
@@ -70,7 +71,13 @@ export function AuthPage({ onLogin }: AuthPageProps) {
           throw new Error("Passwords do not match!");
         }
 
-        const response = await fetch(`${API_URL}/register`, {
+        if (!isPasswordValid(password)) {
+          throw new Error(
+            "Password must be 8–12 characters, contain at least 1 number and 1 special character",
+          );
+        }
+
+        const response = await fetch(`${AUTH_URL}/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -98,16 +105,18 @@ export function AuthPage({ onLogin }: AuthPageProps) {
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0a0f] via-[#1a0a2e] to-[#0a0a0f] p-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px]"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-violet-500/10 rounded-full blur-[100px]"></div>
+    <div className="flex min-h-dvh w-full items-center justify-center overflow-auto bg-gradient-to-br from-[#0a0a0f] via-[#1a0a2e] to-[#0a0a0f] p-3 sm:p-4">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 left-20 h-96 w-96 rounded-full bg-purple-500/10 blur-[100px]" />
+        <div className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-violet-500/10 blur-[100px]" />
       </div>
 
-      <Card className="w-full max-w-md p-8 bg-card/80 backdrop-blur-xl border-border relative z-10">
-        <div className="flex flex-col items-center mb-8">
-          <h1 className="text-white">Galaxy Chat Hub</h1>
-          <p className="text-muted-foreground text-sm mt-2">
+      <Card className="relative z-10 w-full max-w-[min(24rem,calc(100vw-1.5rem))] bg-card/80 p-4 shadow-xl backdrop-blur-xl border-border sm:p-6 md:max-w-md md:p-8">
+        <div className="mb-6 flex flex-col items-center sm:mb-8">
+          <h1 className="text-center text-lg text-white sm:text-xl">
+            Galaxy Chat Hub
+          </h1>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             {isLogin ? "Welcome back!" : "Create your account"}
           </p>
         </div>
@@ -125,7 +134,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
         )}
 
         {/* Conditional form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {!isLogin ? (
             <>
               <div>
@@ -182,6 +191,8 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                 />
               </div>
 
+              <PasswordRules password={password} />
+
               <div>
                 <Input
                   type="password"
@@ -221,8 +232,12 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 
           <button
             type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-white p-2 rounded disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            disabled={loading}
+            className="w-full cursor-pointer rounded bg-primary p-3 text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2"
+            disabled={
+              loading ||
+              (!isLogin &&
+                (!isPasswordValid(password) || password !== confirmPassword))
+            }
           >
             {loading ? "Processing..." : isLogin ? "Log In" : "Sign Up"}
           </button>
@@ -235,7 +250,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
               setIsLogin(!isLogin);
               resetForm();
             }}
-            className="text-sm text-primary hover:text-primary/80 cursor-pointer"
+            className="cursor-pointer text-sm text-primary hover:text-primary/80"
           >
             {isLogin
               ? "Don't have an account? Register"
@@ -245,4 +260,31 @@ export function AuthPage({ onLogin }: AuthPageProps) {
       </Card>
     </div>
   );
+}
+
+function PasswordRules({ password }: { password: string }) {
+  const hasLength = password.length >= 8 && password.length <= 12;
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  function Rule({ ok, text }: { ok: boolean; text: string }) {
+    return (
+      <div className={ok ? "text-green-400 text-sm" : "text-gray-400 text-sm"}>
+        • {text}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-1 mb-2">
+      <Rule ok={hasLength} text="8–12 characters" />
+      <Rule ok={hasNumber} text="At least 1 number" />
+      <Rule ok={hasSpecial} text="At least 1 special character" />
+    </div>
+  );
+}
+
+function isPasswordValid(password: string) {
+  const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,12}$/;
+  return regex.test(password);
 }
