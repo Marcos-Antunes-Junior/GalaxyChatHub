@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { ConfirmModal } from './ui/confirm-modal';
-import { API_URL } from '../config';
-import { socket } from '../socket';
+import { useEffect, useState } from "react";
+import { ConfirmModal } from "./ui/confirm-modal";
+import { API_URL } from "../config";
+import { socket } from "../socket";
 
 interface Friend {
   id: string;
@@ -15,189 +15,397 @@ interface FriendsViewProps {
   onOpenProfile?: (friendId: string) => void;
 }
 
-export function FriendsView({ onChatSelect }: FriendsViewProps) {
+export function FriendsView({ onChatSelect, onOpenProfile }: FriendsViewProps) {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [newFriendName, setNewFriendName] = useState("");
-  const [modal, setModal] = useState({ isOpen: false, title: "", message: "", type: "info" as "danger"|"info"|"alert" });
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info" as "danger" | "info" | "alert",
+  });
+  const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
+  
+  const [searchResults, setSearchResults] = useState<Friend[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!newFriendName.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `${API_URL}/api/users?search=${encodeURIComponent(newFriendName)}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        const data = await res.json();
+
+        if (data.success) {
+          // Filter out existing friends
+          const filtered = data.data.filter(
+            (u: Friend) => !friends.some((f) => f.username === u.username),
+          );
+          setSearchResults(filtered);
+        }
+      } catch (error) {
+        console.error("Search failed", error);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      searchUsers();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [newFriendName, token, friends]);
 
   const fetchFriends = async () => {
     const res = await fetch(`${API_URL}/api/friends`, {
-        headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
-    if(data.success) setFriends(data.data);
+    if (data.success) setFriends(data.data);
   };
 
   const fetchRequests = async () => {
     const res = await fetch(`${API_URL}/api/friends/requests`, {
-        headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
-    if(data.success) {
-        if(data.data.incoming) {
-            setRequests(data.data.incoming);
-        } else {
-             setRequests(data.data); 
-        }
+    if (data.success) {
+      if (data.data.incoming) {
+        setRequests(data.data.incoming);
+      } else {
+        setRequests(data.data);
+      }
     }
   };
 
   useEffect(() => {
     fetchFriends();
     fetchRequests();
-    
+
     // Status Listener
-    const onStatusChange = ({ userId, status }: { userId: number, status: string }) => {
-        setFriends(prev => prev.map(f => {
-            if (parseInt(f.id) === userId) {
-                 return { ...f, status: status === 'online' ? 'online' : 'offline' };
-            }
-            return f;
-        }));
+    const onStatusChange = ({
+      userId,
+      status,
+    }: {
+      userId: number;
+      status: string;
+    }) => {
+      setFriends((prev) =>
+        prev.map((f) => {
+          if (parseInt(f.id) === userId) {
+            return { ...f, status: status === "online" ? "online" : "offline" };
+          }
+          return f;
+        }),
+      );
     };
-    
-    socket.on('user_status_change', onStatusChange);
-    
+
+    socket.on("user_status_change", onStatusChange);
+
     return () => {
-        socket.off('user_status_change', onStatusChange);
+      socket.off("user_status_change", onStatusChange);
     };
   }, []);
 
   const addFriend = async () => {
-      if (!newFriendName.trim()) {
-           setModal({
-              isOpen: true,
-              title: "Error",
-              message: "Please enter a username.",
-              type: "alert"
-           });
-           return;
-      }
+    if (!newFriendName.trim()) {
+      setModal({
+        isOpen: true,
+        title: "Error",
+        message: "Please enter a username.",
+        type: "alert",
+      });
+      return;
+    }
 
-      try {
-          const res = await fetch(`${API_URL}/api/friends/request`, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}` 
-              },
-              body: JSON.stringify({ username: newFriendName })
-          });
-          
-          const data = await res.json();
-          
-          if (data.success) {
-              setNewFriendName("");
-              setModal({
-                  isOpen: true,
-                  title: "Success",
-                  message: "Friend request sent successfully!",
-                  type: "alert"
-              });
-          } else {
-              let msg = data.message || "Failed to send request.";
-              if(msg.toLowerCase().includes('not found')) msg = "Invalid Username";
-              
-              setModal({
-                  isOpen: true,
-                  title: "Error",
-                  message: msg,
-                  type: "alert"
-              });
-          }
-      } catch(e) {
-          setModal({
-              isOpen: true,
-              title: "Error",
-              message: "An unexpected error occurred.",
-              type: "alert"
-          });
+    try {
+      const res = await fetch(`${API_URL}/api/friends/request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username: newFriendName }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setNewFriendName("");
+        setModal({
+          isOpen: true,
+          title: "Success",
+          message: "Friend request sent successfully!",
+          type: "alert",
+        });
+      } else {
+        let msg = data.message || "Failed to send request.";
+        if (msg.toLowerCase().includes("not found")) msg = "Invalid Username";
+
+        setModal({
+          isOpen: true,
+          title: "Error",
+          message: msg,
+          type: "alert",
+        });
       }
+    } catch (e) {
+      setModal({
+        isOpen: true,
+        title: "Error",
+        message: "An unexpected error occurred.",
+        type: "alert",
+      });
+    }
   };
 
   const acceptRequest = async (requestId: number) => {
     await fetch(`${API_URL}/api/friends/accept`, {
-        method: 'POST',
-        headers: {  
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ requestId })
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ requestId }),
     });
     fetchFriends();
     fetchRequests();
   };
 
+  const rejectRequest = async (requestId: number) => {
+    await fetch(`${API_URL}/api/friends/reject`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ requestId }),
+    });
+    fetchRequests();
+  };
+
+  const confirmRemoveFriend = async () => {
+    if (!friendToRemove) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/friends/remove`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ friendId: friendToRemove.id }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setFriends((prev) => prev.filter((f) => f.id !== friendToRemove.id));
+        setFriendToRemove(null);
+      } else {
+        setModal({
+          isOpen: true,
+          title: "Error",
+          message: data.message || "Failed to remove friend",
+          type: "alert",
+        });
+      }
+    } catch (e) {
+      setModal({
+        isOpen: true,
+        title: "Error",
+        message: "An unexpected error occurred",
+        type: "alert",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 text-white sm:p-6">
       <h2 className="mb-4 text-xl font-bold sm:text-2xl">Friends</h2>
-      
-      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:gap-2">
-        <input 
-            className="min-w-0 flex-1 rounded border border-gray-700 bg-gray-800 p-2.5 text-sm outline-none transition-colors placeholder:text-gray-500 focus:border-purple-500 sm:w-64"
-            placeholder="Add friend by username" 
+
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:gap-2 z-10 relative">
+        <div className="relative w-full sm:w-64 max-w-md">
+          <input
+            className="w-full rounded border border-gray-700 bg-gray-800 p-2.5 text-sm outline-none transition-colors placeholder:text-gray-500 focus:border-purple-500"
+            placeholder="Add friend by username"
             value={newFriendName}
-            onChange={e => setNewFriendName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addFriend()}
-        />
-        <button onClick={addFriend} className="h-11 shrink-0 rounded bg-purple-600 px-4 py-2 text-sm font-medium hover:bg-purple-700 cursor-pointer sm:h-10">Add Friend</button>
+            onChange={(e) => setNewFriendName(e.target.value)}
+            onFocus={() => setShowResults(true)}
+            onBlur={() => setTimeout(() => setShowResults(false), 200)}
+            onKeyDown={(e) => e.key === "Enter" && addFriend()}
+          />
+          {showResults && searchResults.length > 0 && (
+            <div className="absolute top-full mt-1 w-full rounded border border-gray-700 bg-gray-900 shadow-lg max-h-60 overflow-y-auto z-50">
+              {searchResults.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center gap-2 p-2 hover:bg-gray-800 cursor-pointer text-gray-200"
+                  onMouseDown={() => {
+                    setNewFriendName(user.username);
+                    setShowResults(false);
+                  }}
+                >
+                  <div className="h-6 w-6 rounded-full overflow-hidden bg-gray-700 shrink-0">
+                    {user.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        className="h-full w-full object-cover"
+                        alt={user.username}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs font-bold text-white bg-purple-500">
+                        {user.username?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-sm truncate">{user.username}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button
+          onClick={addFriend}
+          className="h-11 shrink-0 rounded bg-purple-600 px-4 py-2 text-sm font-medium hover:bg-purple-700 cursor-pointer sm:h-10"
+        >
+          Add Friend
+        </button>
       </div>
 
       <div className="mb-6">
-        <h3 className="mb-2 text-base font-semibold text-gray-400 sm:text-lg">Friend Requests</h3>
-        {requests.length === 0 && <p className="text-sm text-gray-500">No pending requests</p>}
-        {requests.map(req => (
-            <div key={req.id} className="mb-2 flex flex-col gap-2 rounded bg-gray-900 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="min-w-0 truncate text-sm sm:text-base">{req.sender.username} wants to be friends</span>
-                <button onClick={() => acceptRequest(req.id)} className="h-10 shrink-0 self-end rounded bg-green-600 px-3 py-1.5 text-sm cursor-pointer hover:bg-green-700 sm:self-center">Accept</button>
+        <h3 className="mb-2 text-base font-semibold text-gray-400 sm:text-lg">
+          Friend Requests
+        </h3>
+        {requests.length === 0 && (
+          <p className="text-sm text-gray-500">No pending requests</p>
+        )}
+        {requests.map((req) => (
+          <div
+            key={req.id}
+            className="mb-2 flex flex-col gap-2 rounded bg-gray-900 p-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="min-w-0 truncate text-sm sm:text-base">
+              {req.sender.username} wants to be friend
+            </span>
+            <div className="flex shrink-0 self-end gap-2 sm:self-center">
+              <button
+                onClick={() => acceptRequest(req.id)}
+                className="h-10 rounded bg-green-600 px-3 py-1.5 text-sm cursor-pointer hover:bg-green-700"
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => rejectRequest(req.id)}
+                className="h-10 rounded bg-red-600 px-3 py-1.5 text-sm cursor-pointer hover:bg-red-700"
+              >
+                Reject
+              </button>
             </div>
+          </div>
         ))}
       </div>
 
       <div className="grid gap-2">
-        <h3 className="mb-2 text-base font-semibold text-gray-400 sm:text-lg">My Friends</h3>
-        {friends.length === 0 && <p className="text-sm text-gray-500">No friends yet. Add someone!</p>}
-        {friends.map(friend => (
-            <div key={friend.id} className="flex flex-col gap-2 rounded bg-gray-900 p-3 hover:bg-gray-800 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-3">
-                    <div className="h-10 w-10 shrink-0 rounded-full bg-purple-500 flex items-center justify-center text-lg font-bold">
-                        {friend.username?.[0]?.toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                        <div
+        <h3 className="mb-2 text-base font-semibold text-gray-400 sm:text-lg">
+          My Friends
+        </h3>
+        {friends.length === 0 && (
+          <p className="text-sm text-gray-500">No friends yet. Add someone!</p>
+        )}
+        {friends.map((friend) => (
+          <div
+            key={friend.id}
+            className="flex flex-col gap-2 rounded bg-gray-900 p-3 hover:bg-gray-800 sm:flex-row sm:items-center sm:justify-between"
+          >
+            {/* LEFT SIDE */}
+            <div className="flex min-w-0 items-center gap-3">
+              {/* AVATAR */}
+              <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-gray-700">
+                {friend.avatarUrl ? (
+                  <img
+                    src={friend.avatarUrl}
+                    alt={friend.username}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.parentElement!.innerHTML = `<div class="flex items-center justify-center w-full h-full bg-purple-500 text-white font-bold">
+                 ${friend.username?.[0]?.toUpperCase()}
+               </div>`;
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full bg-purple-500 text-white font-bold">
+                    {friend.username?.[0]?.toUpperCase()}
+                  </div>
+                )}
+              </div>
+
+              {/* USER INFO */}
+              <div className="min-w-0">
+                 <div
                           className="truncate font-medium cursor-pointer hover:text-purple-400"
                           onClick={() => onOpenProfile?.(friend.id)}
-                        >{friend.username}</div>
-                        <div className="text-xs text-gray-400">{friend.status}</div>
-                    </div>
-                </div>
-                <div className="flex gap-2">
-                  <button 
-                    className="h-10 shrink-0 rounded border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-gray-400 hover:border-purple-600 hover:bg-purple-600 hover:text-white cursor-pointer"
-                    onClick={() => onChatSelect?.(friend)}
-                  >
-                    Message
-                  </button>
-                  <button
+                  >{friend.username}</div>
+
+                <div className="text-xs text-gray-400">{friend.status}</div>
+              </div>
+            </div>
+
+            {/* RIGHT SIDE BUTTONS */}
+            <div className="flex shrink-0 gap-2 self-end sm:self-center">
+              <button
+                className="h-10 rounded border border-gray-700 bg-gray-600 px-3 py-1.5 text-sm text-gray-200 hover:bg-gray-700 cursor-pointer"
+                onClick={() => onChatSelect?.(friend)}
+              >
+                Message
+              </button>
+
+               <button
                     className="h-10 shrink-0 rounded border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm text-gray-400 hover:border-purple-600 hover:bg-purple-600 hover:text-white cursor-pointer"
                     onClick={() => onOpenProfile?.(friend.id)}
                   >
                     View
-                  </button>
-                </div>
+                </button>
+
+              <button
+                className="h-10 rounded border border-red-900 bg-red-900/20 px-3 py-1.5 text-sm text-red-500 hover:bg-red-900/40 hover:text-red-400 cursor-pointer"
+                onClick={() => setFriendToRemove(friend)}
+              >
+                Remove
+              </button>
             </div>
+          </div>
         ))}
       </div>
 
-      <ConfirmModal 
-          isOpen={modal.isOpen}
-          title={modal.title}
-          message={modal.message}
-          type={modal.type}
-          onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onClose={() => setModal((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      <ConfirmModal
+        isOpen={!!friendToRemove}
+        title="Remove Friend"
+        message={`Are you sure you want to remove ${friendToRemove?.username} from your friends list?`}
+        type="danger"
+        confirmText="Remove"
+        onClose={() => setFriendToRemove(null)}
+        onConfirm={confirmRemoveFriend}
       />
     </div>
   );
