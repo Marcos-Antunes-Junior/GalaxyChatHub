@@ -37,7 +37,7 @@ export function MembersListModal({ isOpen, onClose, roomId }: MembersListModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]">
       <div className="w-full max-w-[24rem] rounded-lg border border-[#26272D] bg-[#313338] p-4 shadow-xl sm:p-6">
         <div className="flex justify-between items-center mb-4">
              <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">

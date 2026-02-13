@@ -317,7 +317,7 @@ export function ChatArea({
 
   if (!selectedFriend) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center bg-[#313338] text-muted-foreground">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center bg-chat-surface/65 text-muted-foreground backdrop-blur-sm">
         <div className="px-4 text-center text-sm sm:text-base">
           <p>Select a conversation or group chat to view</p>
         </div>
@@ -326,14 +326,14 @@ export function ChatArea({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-[#313338] text-gray-100">
-      <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-[#26272D] bg-[#313338] px-2 shadow-sm sm:px-4">
+    <div className="flex min-h-0 flex-1 flex-col bg-chat-surface/60 text-foreground backdrop-blur-sm">
+      <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-chat-surface/75 px-2 shadow-sm sm:px-4">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <Button
             variant="ghost"
             size="icon"
             onClick={onBack}
-            className="h-10 w-10 shrink-0 text-gray-400 hover:text-white sm:h-9 sm:w-9"
+            className="h-10 w-10 shrink-0 text-muted-foreground hover:text-foreground sm:h-9 sm:w-9"
             title="Back"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -352,7 +352,7 @@ export function ChatArea({
             )}
           </Avatar>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 font-bold text-gray-100 text-sm">
+            <div className="flex items-center gap-2 text-sm font-bold text-foreground">
               <span className="truncate">{chatName}</span>
               <span
                 className={`inline-block h-2 w-2 shrink-0 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
@@ -369,7 +369,7 @@ export function ChatArea({
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowMembersList(true)}
-                className="h-10 w-10 text-gray-400 hover:text-white sm:h-9 sm:w-9"
+                className="h-10 w-10 text-muted-foreground hover:text-foreground sm:h-9 sm:w-9"
                 title="Members"
               >
                 <Users className="h-5 w-5" />
@@ -378,7 +378,7 @@ export function ChatArea({
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowAddMember(true)}
-                className="h-10 w-10 text-gray-400 hover:text-white sm:h-9 sm:w-9"
+                className="h-10 w-10 text-muted-foreground hover:text-foreground sm:h-9 sm:w-9"
                 title="Add Member"
               >
                 <UserPlus className="h-5 w-5" />
@@ -387,7 +387,7 @@ export function ChatArea({
                 variant="ghost"
                 size="icon"
                 onClick={handleLeaveGroup}
-                className="h-10 w-10 text-gray-400 hover:text-red-500 sm:h-9 sm:w-9"
+                className="h-10 w-10 text-muted-foreground hover:text-red-500 sm:h-9 sm:w-9"
                 title="Leave Group"
               >
                 <LogOut className="h-5 w-5" />
@@ -397,7 +397,7 @@ export function ChatArea({
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 text-gray-400 hover:bg-transparent hover:text-red-500 sm:h-9 sm:w-9"
+            className="h-10 w-10 text-muted-foreground hover:bg-transparent hover:text-red-500 sm:h-9 sm:w-9"
             onClick={handleDeleteConversation}
             title="Delete Conversation"
           >
@@ -425,7 +425,7 @@ export function ChatArea({
             const systemContent = msg.content.replace("SYSTEM:", "");
             return (
               <div key={msg.id || idx} className="flex justify-center my-2">
-                <span className="text-xs text-gray-500 bg-[#26272D] px-3 py-1 rounded-full">
+                <span className="rounded-full bg-chat-elevated px-3 py-1 text-xs text-chat-muted">
                   {systemContent}
                 </span>
               </div>
@@ -459,7 +459,7 @@ export function ChatArea({
                 className={`max-w-[85%] rounded-lg p-2.5 text-sm sm:max-w-[70%] sm:p-3 ${
                   isMe
                     ? "rounded-br-none bg-blue-600 text-white"
-                    : "rounded-bl-none bg-[#2B2D31] text-gray-100"
+                    : "rounded-bl-none bg-chat-incoming text-foreground"
                 }`}
               >
                 {msg.content}
@@ -469,10 +469,10 @@ export function ChatArea({
         })}
       </div>
 
-      <div className="shrink-0 bg-[#313338] p-3 sm:p-4">
-        <div className="flex items-center gap-2 rounded-lg bg-[#383A40] px-3 py-2 sm:px-4">
+      <div className="shrink-0 bg-chat-surface/70 p-3 sm:p-4">
+        <div className="flex items-center gap-2 rounded-lg bg-chat-elevated/85 px-3 py-2 sm:px-4">
           <input
-            className="min-w-0 flex-1 bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-400"
+            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
             placeholder={`Message ${chatName}`}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -482,7 +482,7 @@ export function ChatArea({
             variant="ghost"
             size="icon"
             onClick={handleSend}
-            className="h-10 w-10 shrink-0 text-gray-400 hover:bg-transparent hover:text-white sm:h-9 sm:w-9"
+            className="h-10 w-10 shrink-0 text-muted-foreground hover:bg-transparent hover:text-foreground sm:h-9 sm:w-9"
           >
             <SendHorizontal className="h-5 w-5" />
           </Button>

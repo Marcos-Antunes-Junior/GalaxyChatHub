@@ -56,7 +56,7 @@ export function Sidebar({
   return (
     <aside
       className={`
-        z-40 flex h-screen w-60 flex-col bg-sidebar border-r border-sidebar-border
+        z-40 flex h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar/80 backdrop-blur-xl
         transition-transform duration-200 ease-out
         fixed left-0 top-0 md:relative md:translate-x-0
         ${open ? "translate-x-0" : "-translate-x-full"}
@@ -75,7 +75,7 @@ export function Sidebar({
           <div className="h-9 w-9 shrink-0 sm:h-10 sm:w-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center">
             <BotMessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <span className="truncate text-sm font-medium text-white sm:text-base">
+          <span className="truncate text-sm font-medium text-sidebar-foreground sm:text-base">
             Galaxy Chat Hub
           </span>
         </div>
@@ -132,7 +132,7 @@ export function Sidebar({
                 className="h-4 w-4"
                 onClick={() => setIsCreateRoomOpen(true)}
               >
-                <Plus className="w-4 h-4 text-muted-foreground hover:text-white" />
+                <Plus className="w-4 h-4 text-muted-foreground hover:text-foreground" />
               </Button>
             </div>
             {rooms.map((room: any) => (
@@ -172,7 +172,7 @@ export function Sidebar({
       )}
 
       {/* User Section */}
-      <div className="mt-auto shrink-0 border-t border-sidebar-border bg-[#0a0a0f] p-3">
+      <div className="mt-auto shrink-0 border-t border-sidebar-border bg-sidebar/85 p-3">
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8 shrink-0">
             {currentUser.avatarUrl ? (
@@ -197,7 +197,7 @@ export function Sidebar({
           </Avatar>
 
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm text-white">
+            <div className="truncate text-sm text-sidebar-foreground">
               {currentUser.username}
             </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -209,7 +209,7 @@ export function Sidebar({
             variant="ghost"
             size="icon"
             onClick={onLogout}
-            className="h-9 w-9 shrink-0 text-muted-foreground hover:text-white cursor-pointer"
+            className="h-9 w-9 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
           </Button>

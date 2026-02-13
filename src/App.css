@@ -4,61 +4,92 @@
 
 :root {
   --font-size: 16px;
-  --background: #0a0a0f;
-  --foreground: #ffffff;
-  --card: #1a1a2e;
-  --card-foreground: #ffffff;
-  --popover: #1a1a2e;
-  --popover-foreground: #ffffff;
+  --radius: 0.5rem;
+  --app-wallpaper: radial-gradient(1200px 700px at 10% 0%, rgba(167, 139, 250, 0.28), transparent 56%), radial-gradient(1000px 560px at 90% 100%, rgba(59, 130, 246, 0.2), transparent 60%), linear-gradient(130deg, #05060f 0%, #120f24 52%, #04040b 100%);
+
+  --background: #f6f7fb;
+  --foreground: #121421;
+  --card: #ffffff;
+  --card-foreground: #121421;
+  --popover: #ffffff;
+  --popover-foreground: #121421;
   --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
   --primary-foreground: #ffffff;
-  --secondary: #2d2d44;
-  --secondary-foreground: #ffffff;
-  --muted: #2d2d44;
-  --muted-foreground: #a0a0b8;
-  --accent: #7c3aed;
-  --accent-foreground: #ffffff;
+  --secondary: #eceef7;
+  --secondary-foreground: #1d2134;
+  --muted: #eef0f7;
+  --muted-foreground: #5b6178;
+  --accent: #a78bfa;
+  --accent-foreground: #141722;
   --destructive: 0.62 0.23 29;
   --destructive-foreground: #ffffff;
-  --border: rgba(139, 92, 246, 0.2);
-  --input: rgba(139, 92, 246, 0.3);
-  --input-background: #1a1a2e;
-  --switch-background: #2d2d44;
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
+  --border: rgba(139, 92, 246, 0.28);
+  --input: rgba(139, 92, 246, 0.36);
+  --input-background: #ffffff;
   --ring: #8b5cf6;
-  --chart-1: #8b5cf6;
-  --chart-2: #7c3aed;
-  --chart-3: #6d28d9;
-  --chart-4: #a78bfa;
-  --chart-5: #c4b5fd;
-  --radius: 0.5rem;
-  --sidebar: #0f0f1a;
-  --sidebar-foreground: #ffffff;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #121421;
   --sidebar-primary: #8b5cf6;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a1a2e;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(139, 92, 246, 0.2);
+  --sidebar-accent: #eef0f7;
+  --sidebar-accent-foreground: #121421;
+  --sidebar-border: rgba(139, 92, 246, 0.25);
   --sidebar-ring: #8b5cf6;
+
+  --chat-surface: #eef1f8;
+  --chat-elevated: #ffffff;
+  --chat-incoming: #e9ecf5;
+  --chat-muted: #6a7189;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
+[data-theme="dark"] {
+  --background: #0a0a0f;
+  --foreground: #f7f8fd;
+  --card: #171826;
+  --card-foreground: #f7f8fd;
+  --popover: #171826;
+  --popover-foreground: #f7f8fd;
+  --secondary: #232639;
+  --secondary-foreground: #f7f8fd;
+  --muted: #232639;
+  --muted-foreground: #a5abbe;
+  --accent-foreground: #f7f8fd;
+  --input-background: #1a1d2c;
+  --sidebar: #0f111a;
+  --sidebar-foreground: #f7f8fd;
+  --sidebar-accent: #1b1f31;
+  --sidebar-accent-foreground: #f7f8fd;
+  --sidebar-border: rgba(148, 154, 187, 0.2);
+  --chat-surface: #1f2230;
+  --chat-elevated: #262a3c;
+  --chat-incoming: #2c3041;
+  --chat-muted: #9aa1b8;
+}
+
+[data-theme="amoled"] {
+  --background: #000000;
+  --foreground: #f7f8fd;
+  --card: #060606;
+  --card-foreground: #f7f8fd;
+  --popover: #060606;
+  --popover-foreground: #f7f8fd;
+  --secondary: #101010;
+  --secondary-foreground: #f7f8fd;
+  --muted: #101010;
+  --muted-foreground: #9ea4b8;
+  --accent-foreground: #f7f8fd;
+  --input-background: #0d0d0d;
+  --sidebar: #050505;
+  --sidebar-foreground: #f7f8fd;
+  --sidebar-accent: #121212;
+  --sidebar-accent-foreground: #f7f8fd;
+  --sidebar-border: rgba(190, 194, 218, 0.2);
+  --chat-surface: #000000;
+  --chat-elevated: #0d0d0d;
+  --chat-incoming: #141414;
+  --chat-muted: #9ca3b8;
 }
 
 @theme inline {
@@ -66,16 +97,35 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-input-background: var(--input-background);
   --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-chat-surface: var(--chat-surface);
+  --color-chat-elevated: var(--chat-elevated);
+  --color-chat-incoming: var(--chat-incoming);
+  --color-chat-muted: var(--chat-muted);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -89,62 +139,58 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    font-size: var(--font-size);
+  }
+
   body {
     @apply bg-background text-foreground;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
 
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
-
-  html {
-    font-size: var(--font-size);
+  .app-wallpaper {
+    background-color: var(--background);
+    background-image: var(--app-wallpaper);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   h1 {
     font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
+    font-weight: 600;
     line-height: 1.5;
   }
 
   h2 {
     font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
+    font-weight: 600;
     line-height: 1.5;
   }
 
   h3 {
     font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
+    font-weight: 600;
     line-height: 1.5;
   }
 
   h4 {
     font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
+    font-weight: 600;
     line-height: 1.5;
   }
 
-  label {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
+  label,
   button {
     font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
+    font-weight: 500;
     line-height: 1.5;
-    padding: 6px;
-    border-radius: 8px;
   }
 
   input {
     font-size: var(--text-base);
-    font-weight: var(--font-weight-normal);
+    font-weight: 400;
     line-height: 1.5;
   }
 }

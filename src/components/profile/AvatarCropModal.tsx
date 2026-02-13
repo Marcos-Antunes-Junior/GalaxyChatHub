@@ -62,7 +62,7 @@ export function AvatarCropModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]">
       <div className="w-full max-w-[360px] rounded-lg bg-card p-4">
 
         <div className="relative w-full h-[300px] bg-black rounded overflow-hidden">

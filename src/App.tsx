@@ -8,6 +8,12 @@ import { ChatArea } from "./components/ChatArea";
 import { socket } from "./socket";
 import { ConfirmModal } from "./components/ui/confirm-modal";
 import { API_URL } from "./config";
+import {
+  applyThemePreferences,
+  loadThemePreferences,
+  saveThemePreferences,
+} from "./theme";
+import type { ThemePreferences } from "./theme";
 
 interface User {
   id: number;
@@ -20,6 +26,9 @@ interface User {
 }
 
 function App() {
+  const [themePreferences, setThemePreferences] = useState<ThemePreferences>(() =>
+    loadThemePreferences(),
+  );
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeView, setActiveView] = useState<"friends" | "rooms" | "profile">(() => {
       const saved = localStorage.getItem('activeView');
@@ -33,6 +42,15 @@ function App() {
   const [modal, setModal] = useState({ isOpen: false, title: "", message: "", type: "info" as "danger"|"info"|"alert", onConfirm: undefined as undefined|(() => void) });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const chatRestoredRef = useRef(false);
+  
+  const getCurrentUserThemeKey = (user?: User | null) => {
+    const activeUser = user ?? currentUser;
+    return activeUser?.id ?? activeUser?.email ?? null;
+  };
+
+  useEffect(() => {
+    applyThemePreferences(themePreferences);
+  }, [themePreferences]);
 
   useEffect(() => {
     selectedFriendRef.current = selectedFriend;
@@ -59,6 +77,12 @@ function App() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    const userKey = getCurrentUserThemeKey(currentUser);
+    const prefs = loadThemePreferences(userKey);
+    setThemePreferences(prefs);
+  }, [currentUser?.id, currentUser?.email]);
 
   const loadUser = async () => {
     const token = localStorage.getItem("token");
@@ -198,10 +222,17 @@ function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setSelectedFriend(null);
+    setThemePreferences(loadThemePreferences());
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('selectedChat');
     socket.disconnect();
+  };
+
+  const handleThemePreferencesChange = (next: ThemePreferences) => {
+    const userKey = getCurrentUserThemeKey();
+    setThemePreferences(next);
+    saveThemePreferences(next, userKey);
   };
 
  const handleUpdateProfile = async (
@@ -251,7 +282,7 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen min-h-0 w-full max-w-[100vw] overflow-hidden bg-background">
+    <div className="app-wallpaper flex h-screen min-h-0 w-full max-w-[100vw] overflow-hidden bg-background">
 
       {/* Mobile overlay when sidebar is open */}
       <div
@@ -286,7 +317,7 @@ function App() {
       />
 
       {/* Mobile top bar: menu button when sidebar is closed */}
-      <div className="fixed top-0 left-0 right-0 z-20 flex h-14 items-center gap-3 border-b border-sidebar-border bg-sidebar px-3 md:hidden">
+      <div className="fixed top-0 left-0 right-0 z-20 flex h-14 items-center gap-3 border-b border-sidebar-border bg-sidebar/80 px-3 backdrop-blur md:hidden">
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
@@ -297,7 +328,7 @@ function App() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <span className="truncate text-sm font-medium text-white">Galaxy Chat Hub</span>
+        <span className="truncate text-sm font-medium text-sidebar-foreground">Galaxy Chat Hub</span>
       </div>
 
       <main className="flex min-w-0 flex-1 flex-col pt-14 md:pt-0">
@@ -327,6 +358,8 @@ function App() {
           user={currentUser}
           onUpdateProfile={handleUpdateProfile}
           onLogout={handleLogout}
+          themePreferences={themePreferences}
+          onThemePreferencesChange={handleThemePreferencesChange}
         />
       )}
 

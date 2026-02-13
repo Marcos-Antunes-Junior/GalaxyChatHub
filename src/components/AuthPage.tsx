@@ -105,15 +105,15 @@ export function AuthPage({ onLogin }: AuthPageProps) {
     }
   };
   return (
-    <div className="flex min-h-dvh w-full items-center justify-center overflow-auto bg-gradient-to-br from-[#0a0a0f] via-[#1a0a2e] to-[#0a0a0f] p-3 sm:p-4">
+    <div className="app-wallpaper flex min-h-dvh w-full items-center justify-center overflow-auto bg-background p-3 sm:p-4">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 left-20 h-96 w-96 rounded-full bg-purple-500/10 blur-[100px]" />
-        <div className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-violet-500/10 blur-[100px]" />
+        <div className="absolute top-20 left-20 h-96 w-96 rounded-full bg-primary/10 blur-[100px]" />
+        <div className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-accent/15 blur-[100px]" />
       </div>
 
       <Card className="relative z-10 w-full max-w-[min(24rem,calc(100vw-1.5rem))] bg-card/80 p-4 shadow-xl backdrop-blur-xl border-border sm:p-6 md:max-w-md md:p-8">
         <div className="mb-6 flex flex-col items-center sm:mb-8">
-          <h1 className="text-center text-lg text-white sm:text-xl">
+          <h1 className="text-center text-lg text-foreground sm:text-xl">
             Galaxy Chat Hub
           </h1>
           <p className="mt-2 text-center text-sm text-muted-foreground">
@@ -143,7 +143,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="bg-input-background border-input text-white placeholder:text-muted-foreground"
+                  className="bg-input-background border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -153,7 +153,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   placeholder="First Name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="bg-input-background border-input text-white placeholder:text-muted-foreground"
+                  className="bg-input-background border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -164,7 +164,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   placeholder="Last Name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="bg-input-background border-input text-white placeholder:text-muted-foreground"
+                  className="bg-input-background border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -175,7 +175,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-input-background border-input text-white placeholder:text-muted-foreground"
+                  className="bg-input-background border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -186,7 +186,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-input-background border-input text-white placeholder:text-muted-foreground"
+                  className="bg-input-background border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -199,7 +199,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-input-background border-input text-white placeholder:text-muted-foreground"
+                  className="bg-input-background border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -212,7 +212,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-input-background border-input text-white placeholder:text-muted-foreground"
+                  className="bg-input-background border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -223,7 +223,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-input-background border-input text-white placeholder:text-muted-foreground"
+                  className="bg-input-background border-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>

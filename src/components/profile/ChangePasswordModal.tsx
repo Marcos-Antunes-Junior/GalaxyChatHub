@@ -63,7 +63,7 @@ export function ChangePasswordModal({ onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black/70 p-4 z-[9999]"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]"
       onClick={onClose}
     >
       {/* MODAL CARD */}

@@ -38,10 +38,10 @@ export function ProfileInfo({
                 username: e.target.value,
               })
             }
-            className="bg-input-background border-input text-white"
+            className="bg-input-background border-input text-foreground"
           />
         ) : (
-          <div className="text-white">{user.username}</div>
+          <div className="text-foreground">{user.username}</div>
         )}
       </div>
 
@@ -62,10 +62,10 @@ export function ProfileInfo({
                 email: e.target.value,
               })
             }
-            className="bg-input-background border-input text-white"
+            className="bg-input-background border-input text-foreground"
           />
         ) : (
-          <div className="text-white">{user.email}</div>
+          <div className="text-foreground">{user.email}</div>
         )}
       </div>
     </div>

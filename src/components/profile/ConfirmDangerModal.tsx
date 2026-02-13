@@ -22,7 +22,7 @@ export function ConfirmDangerModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px]">
       <div className="w-full max-w-[380px] rounded-lg border border-destructive/40 bg-card p-4 sm:p-6">
         <h3 className="text-white text-lg mb-2">{title}</h3>
 

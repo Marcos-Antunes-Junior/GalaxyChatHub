@@ -193,12 +193,12 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 text-white sm:p-6">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 text-foreground sm:p-6">
       <h2 className="mb-4 text-xl font-bold sm:text-2xl">Friends</h2>
 
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:gap-2">
         <input
-          className="w-full sm:w-64 max-w-md rounded border border-gray-700 bg-gray-800 p-2.5 text-sm outline-none transition-colors placeholder:text-gray-500 focus:border-purple-500"
+          className="w-full max-w-md rounded border border-border bg-card/70 p-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary sm:w-64"
           placeholder="Add friend by username"
           value={newFriendName}
           onChange={(e) => setNewFriendName(e.target.value)}
@@ -206,23 +206,23 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
         />
         <button
           onClick={addFriend}
-          className="h-11 shrink-0 rounded bg-purple-600 px-4 py-2 text-sm font-medium hover:bg-purple-700 cursor-pointer sm:h-10"
+          className="h-11 shrink-0 cursor-pointer rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 sm:h-10"
         >
           Add Friend
         </button>
       </div>
 
       <div className="mb-6">
-        <h3 className="mb-2 text-base font-semibold text-gray-400 sm:text-lg">
+        <h3 className="mb-2 text-base font-semibold text-muted-foreground sm:text-lg">
           Friend Requests
         </h3>
         {requests.length === 0 && (
-          <p className="text-sm text-gray-500">No pending requests</p>
+          <p className="text-sm text-muted-foreground">No pending requests</p>
         )}
         {requests.map((req) => (
           <div
             key={req.id}
-            className="mb-2 flex flex-col gap-2 rounded bg-gray-900 p-3 sm:flex-row sm:items-center sm:justify-between"
+            className="mb-2 flex flex-col gap-2 rounded border border-border bg-card/70 p-3 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between"
           >
             <span className="min-w-0 truncate text-sm sm:text-base">
               {req.sender.username} wants to be friend
@@ -230,13 +230,13 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
             <div className="flex shrink-0 self-end gap-2 sm:self-center">
               <button
                 onClick={() => acceptRequest(req.id)}
-                className="h-10 rounded bg-green-600 px-3 py-1.5 text-sm cursor-pointer hover:bg-green-700"
+                className="h-10 cursor-pointer rounded bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700"
               >
                 Accept
               </button>
               <button
                 onClick={() => rejectRequest(req.id)}
-                className="h-10 rounded bg-red-600 px-3 py-1.5 text-sm cursor-pointer hover:bg-red-700"
+                className="h-10 cursor-pointer rounded bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700"
               >
                 Reject
               </button>
@@ -246,21 +246,21 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
       </div>
 
       <div className="grid gap-2">
-        <h3 className="mb-2 text-base font-semibold text-gray-400 sm:text-lg">
+        <h3 className="mb-2 text-base font-semibold text-muted-foreground sm:text-lg">
           My Friends
         </h3>
         {friends.length === 0 && (
-          <p className="text-sm text-gray-500">No friends yet. Add someone!</p>
+          <p className="text-sm text-muted-foreground">No friends yet. Add someone!</p>
         )}
         {friends.map((friend) => (
           <div
             key={friend.id}
-            className="flex flex-col gap-2 rounded bg-gray-900 p-3 hover:bg-gray-800 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 rounded border border-border bg-card/70 p-3 backdrop-blur-sm hover:bg-card/85 sm:flex-row sm:items-center sm:justify-between"
           >
             {/* LEFT SIDE */}
             <div className="flex min-w-0 items-center gap-3">
               {/* AVATAR */}
-              <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden bg-gray-700">
+              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-card">
                 {friend.avatarUrl ? (
                   <img
                     src={friend.avatarUrl}
@@ -284,14 +284,14 @@ export function FriendsView({ onChatSelect }: FriendsViewProps) {
               <div className="min-w-0">
                 <div className="truncate font-medium">{friend.username}</div>
 
-                <div className="text-xs text-gray-400">{friend.status}</div>
+                <div className="text-xs text-muted-foreground">{friend.status}</div>
               </div>
             </div>
 
             {/* RIGHT SIDE BUTTONS */}
             <div className="flex shrink-0 gap-2 self-end sm:self-center">
               <button
-                className="h-10 rounded border border-gray-700 bg-gray-600 px-3 py-1.5 text-sm text-gray-200 hover:bg-gray-700 cursor-pointer"
+                className="h-10 cursor-pointer rounded border border-border bg-secondary/80 px-3 py-1.5 text-sm text-foreground hover:bg-secondary"
                 onClick={() => onChatSelect?.(friend)}
               >
                 Message

@@ -17,7 +17,7 @@ export function ProfileHeader({
   return (
     <div className="shrink-0 border-b border-border p-4 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-medium text-white sm:text-base">My Profile</h2>
+        <h2 className="text-lg font-medium text-foreground sm:text-base">My Profile</h2>
 
         {!isEditing ? (
           <Button
@@ -32,7 +32,7 @@ export function ProfileHeader({
             <Button
               onClick={onCancel}
               variant="outline"
-              className="border-border text-white hover:bg-secondary cursor-pointer"
+              className="border-border cursor-pointer text-foreground hover:bg-secondary"
             >
               <X className="w-4 h-4 mr-2" />
               Cancel

@@ -8,8 +8,10 @@ import { ConfirmDangerModal } from "./ConfirmDangerModal";
 import { ProfileInfo } from "./ProfileInfo";
 import { ProfileTabs } from "./ProfileTabs";
 import { API_URL } from "../../config";
+import type { ThemePreferences } from "../../theme";
 
 interface UserProfile {
+  id: number;
   username: string;
   email: string;
   bio?: string;
@@ -19,8 +21,12 @@ interface UserProfile {
 
 interface ProfileViewProps {
   user: UserProfile;
-  onUpdateProfile: (updates: Partial<UserProfile>) => void;
+  onUpdateProfile: (
+    updates: Partial<UserProfile> & { avatar?: File | null },
+  ) => void;
   onLogout: () => void;
+  themePreferences: ThemePreferences;
+  onThemePreferencesChange: (next: ThemePreferences) => void;
 }
 
 
@@ -28,6 +34,8 @@ export function ProfileView({
   user,
   onUpdateProfile,
   onLogout,
+  themePreferences,
+  onThemePreferencesChange,
 }: ProfileViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState<UserProfile>(user);
@@ -115,7 +123,7 @@ export function ProfileView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-screen bg-background overflow-hidden">
+    <div className="flex h-screen flex-1 flex-col overflow-hidden bg-transparent">
       {/* Header */}
       <ProfileHeader
         isEditing={isEditing}
@@ -157,6 +165,8 @@ export function ProfileView({
             user={user}
             editedUser={editedUser}
             setEditedUser={setEditedUser}
+            themePreferences={themePreferences}
+            onThemePreferencesChange={onThemePreferencesChange}
           />
 
           {/* Danger Zone */}
